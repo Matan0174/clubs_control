@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול כרטיסי חבר</title>
+    <meta name="description" content="אפליקציה לשמירת כרטיסי מועדון של חברים ומכרים">
+    <!-- PWA settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%233b82f6'/><text x='50' y='50' font-family='sans-serif' font-size='40' fill='white' text-anchor='middle' dy='.3em'>💳</text></svg>">
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="background-animation"></div>
+    <div class="container">
+        <header>
+            <h1>ניהול מועדונים</h1>
+            <p>שמור את כל החברים שיש להם כרטיסי מועדון במקום אחד</p>
+        </header>
+
+        <section class="glass-card form-section">
+            <h2>הוספת חבר חדש</h2>
+            <form id="membership-form">
+                <div class="form-group">
+                    <label for="person-name">שם החבר</label>
+                    <input type="text" id="person-name" required placeholder="לדוגמה: משה כהן">
+                </div>
+                <div class="form-group">
+                    <label for="store-name">שם החנות / רשת</label>
+                    <input type="text" id="store-name" required placeholder="לדוגמה: רמי לוי, פוקס">
+                </div>
+                <div class="form-group">
+                    <label for="member-id">מספר חבר / מספר טלפון</label>
+                    <input type="text" id="member-id" required placeholder="מספר כרטיס המועדון">
+                </div>
+                <div class="form-group">
+                    <label for="notes">הערות נוספות (אופציונלי)</label>
+                    <input type="text" id="notes" placeholder="פרטים נוספים...">
+                </div>
+                <button type="submit" class="primary-btn">הוסף מועדון</button>
+            </form>
+        </section>
+
+        <section class="controls">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="חפש לפי שם או חנות...">
+            </div>
+        </section>
+
+        <main id="memberships-list" class="grid-container">
+            <!-- כרטיסי המועדון יתווספו לכאן דינמית -->
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('ServiceWorker registration successful'))
+                    .catch(err => console.log('ServiceWorker registration failed: ', err));
+            });
+        }
+    </script>
+</body>
+
+</html>
