@@ -1,78 +1,96 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('membership-form');
-    const searchInput = document.getElementById('search-input');
-    const listContainer = document.getElementById('memberships-list');
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("membership-form");
+  const searchInput = document.getElementById("search-input");
+  const listContainer = document.getElementById("memberships-list");
 
-    let memberships = JSON.parse(localStorage.getItem('club_memberships')) || [];
+  let memberships = JSON.parse(localStorage.getItem("club_memberships")) || [];
 
-    // Initial render
-    renderMemberships();
+  // Tab Navigation Logic
+  const navItems = document.querySelectorAll(".nav-item");
+  const tabContents = document.querySelectorAll(".tab-content");
 
-    // Form submission
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const newMembership = {
-            id: Date.now().toString(),
-            name: document.getElementById('person-name').value.trim(),
-            store: document.getElementById('store-name').value.trim(),
-            memberId: document.getElementById('member-id').value.trim(),
-            notes: document.getElementById('notes').value.trim()
-        };
+  navItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      // Remove active class from all
+      navItems.forEach((nav) => nav.classList.remove("active"));
+      tabContents.forEach((tab) => tab.classList.remove("active"));
 
-        memberships.push(newMembership);
-        saveData();
-        renderMemberships();
-        form.reset();
-        
-        // Return focus to first input
-        document.getElementById('person-name').focus();
+      // Add active class to current
+      item.classList.add("active");
+      const targetId = item.getAttribute("data-target");
+      document.getElementById(targetId).classList.add("active");
     });
+  });
 
-    // Search functionality
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        renderMemberships(searchTerm);
-    });
+  // Initial render
+  renderMemberships();
 
-    // Save to LocalStorage
-    function saveData() {
-        localStorage.setItem('club_memberships', JSON.stringify(memberships));
-    }
+  // Form submission
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
 
-    // Delete membership
-    window.deleteMembership = function(id) {
-        if(confirm('האם אתה בטוח שברצונך למחוק מועדון זה?')) {
-            memberships = memberships.filter(m => m.id !== id);
-            saveData();
-            // Re-render with current search filter if any
-            renderMemberships(searchInput.value.toLowerCase());
-        }
+    const newMembership = {
+      id: Date.now().toString(),
+      name: document.getElementById("person-name").value.trim(),
+      store: document.getElementById("store-name").value.trim(),
+      memberId: document.getElementById("member-id").value.trim(),
+      notes: document.getElementById("notes").value.trim(),
     };
 
-    // Render list
-    function renderMemberships(filterText = '') {
-        listContainer.innerHTML = '';
+    memberships.push(newMembership);
+    saveData();
+    renderMemberships();
+    form.reset();
 
-        const filtered = memberships.filter(m => 
-            m.name.toLowerCase().includes(filterText) || 
-            m.store.toLowerCase().includes(filterText)
-        );
+    // Return focus to first input
+    document.getElementById("person-name").focus();
+  });
 
-        if (filtered.length === 0) {
-            listContainer.innerHTML = `
+  // Search functionality
+  searchInput.addEventListener("input", (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    renderMemberships(searchTerm);
+  });
+
+  // Save to LocalStorage
+  function saveData() {
+    localStorage.setItem("club_memberships", JSON.stringify(memberships));
+  }
+
+  // Delete membership
+  window.deleteMembership = function (id) {
+    if (confirm("האם אתה בטוח שברצונך למחוק מועדון זה?")) {
+      memberships = memberships.filter((m) => m.id !== id);
+      saveData();
+      // Re-render with current search filter if any
+      renderMemberships(searchInput.value.toLowerCase());
+    }
+  };
+
+  // Render list
+  function renderMemberships(filterText = "") {
+    listContainer.innerHTML = "";
+
+    const filtered = memberships.filter(
+      (m) =>
+        m.name.toLowerCase().includes(filterText) ||
+        m.store.toLowerCase().includes(filterText),
+    );
+
+    if (filtered.length === 0) {
+      listContainer.innerHTML = `
                 <div class="empty-state">
                     <h3>לא נמצאו כרטיסי מועדון</h3>
-                    <p>${filterText ? 'לא נמצאו תוצאות לחיפוש שלך.' : 'הוסף את המועדון הראשון שלך למעלה!'}</p>
+                    <p>${filterText ? "לא נמצאו תוצאות לחיפוש שלך." : "הוסף את המועדון הראשון שלך למעלה!"}</p>
                 </div>
             `;
-            return;
-        }
+      return;
+    }
 
-        filtered.forEach(m => {
-            const card = document.createElement('div');
-            card.className = 'membership-card';
-            card.innerHTML = `
+    filtered.forEach((m) => {
+      const card = document.createElement("div");
+      card.className = "membership-card";
+      card.innerHTML = `
                 <div class="card-header">
                     <span class="member-name">${escapeHTML(m.name)}</span>
                     <span class="store-badge">${escapeHTML(m.store)}</span>
@@ -81,24 +99,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="detail-label">מספר מועדון / חבר:</span>
                     <span class="detail-value">${escapeHTML(m.memberId)}</span>
                 </div>
-                ${m.notes ? `
+                ${
+                  m.notes
+                    ? `
                 <div class="card-detail" style="margin-top: 5px;">
                     <span class="detail-label">הערות:</span>
                     <span class="note-value">${escapeHTML(m.notes)}</span>
-                </div>` : ''}
+                </div>`
+                    : ""
+                }
                 
                 <button class="delete-btn" onclick="deleteMembership('${m.id}')" title="מחק השמירה">
                     🗑️
                 </button>
             `;
-            listContainer.appendChild(card);
-        });
-    }
+      listContainer.appendChild(card);
+    });
+  }
 
-    // Utility to prevent XSS
-    function escapeHTML(str) {
-        const div = document.createElement('div');
-        div.innerText = str;
-        return div.innerHTML;
-    }
+  // Utility to prevent XSS
+  function escapeHTML(str) {
+    const div = document.createElement("div");
+    div.innerText = str;
+    return div.innerHTML;
+  }
 });
